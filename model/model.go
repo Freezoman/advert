@@ -55,13 +55,13 @@ func (m *Model) GetOneAdvert(id int, optFields ...string) Ad {
 	res := m.db.Select(fields).Where(id).First(&ad)
 	if res.Error != nil {
 		log.Print(res.Error)
-		log.Fatalf("advertisement with id = %b is not found", id)
+		// log.Fatalf("advertisement with id = %b is not found", id)
 	}
 	if find(optFields, "photos") {
 		res = m.db.Select("url").Where(&Photo{AdID: id}).Find(&photos)
 		if res.Error != nil {
 			log.Print(res.Error)
-			log.Fatalf("photo with adid = %b is not found", id)
+			// log.Fatalf("photo with adid = %b is not found", id)
 		}
 		ad.Photos = photos
 	}
@@ -84,5 +84,12 @@ func (m *Model) GetAdverts(sortField string, order string) []Ad {
 		ads[id].Photos = photos
 	}
 	return ads
+}
 
+func (m *Model) InsertAdvert(ad Ad) error {
+	res := m.db.Create(&ad)
+	if res.Error != nil {
+		return res.Error
+	}
+	return nil
 }

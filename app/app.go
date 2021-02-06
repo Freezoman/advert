@@ -2,6 +2,9 @@ package app
 
 import (
 	"encoding/json"
+	"mime/multipart"
+	"strconv"
+	"strings"
 	"test/model"
 )
 
@@ -27,8 +30,17 @@ func Init(m IModel) *App {
 	return &App{model: m}
 }
 
-func (a *App) GetJsonAdvert(id int, optFields ...string) string {
+func (a *App) GetJsonAdvert(idStr string, optFields ...string) string {
 
+	if strings.HasPrefix(idStr, "id") {
+		idStr = idStr[2:]
+	} else {
+		return "Link is incomplete"
+	}
+	id, err := strconv.Atoi(idStr)
+	if err != nil {
+		return err.Error()
+	}
 	availableOptFields := []string{"body", "photos"}
 	for _, v := range optFields {
 		if !find(availableOptFields, v) {
@@ -62,4 +74,14 @@ func (a *App) GetJsonAdverts(sortField string, order string) string {
 	}
 
 	return string(b)
+}
+
+func (a *App) CreateAdvert(data multipart.Form) string {
+	title := data.Value["title"]
+	body := data.Value["body"]
+	price := data.Value["price"]
+}
+
+func (a *App) createPhoto(file multipart.File, handler *multipart.FileHeader) model.Photo {
+
 }
