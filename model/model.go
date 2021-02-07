@@ -86,10 +86,10 @@ func (m *Model) GetAdverts(sortField string, order string) []Ad {
 	return ads
 }
 
-func (m *Model) InsertAdvert(ad Ad) error {
+func (m *Model) InsertAdvert(ad Ad) (uint, error) {
 	res := m.db.Create(&ad)
 	if res.Error != nil {
-		return res.Error
+		return 0, res.Error
 	}
-	return nil
+	return ad.ID, nil
 }

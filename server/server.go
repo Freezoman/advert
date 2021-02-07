@@ -21,7 +21,7 @@ func Init(a IApp) *Server {
 type IApp interface {
 	GetJsonAdvert(id string, optFields ...string) string
 	GetJsonAdverts(sortField string, order string) string
-	CreateAdvert(data *multipart.Form) error
+	CreateAdvert(data *multipart.Form) (string, error)
 }
 
 func (s *Server) getAdvert(w http.ResponseWriter, r *http.Request) {
@@ -57,24 +57,20 @@ func (s *Server) uploadAdvert(w http.ResponseWriter, r *http.Request) {
 	r.ParseMultipartForm(10 << 20)
 	formData := r.MultipartForm
 
-	err := s.app.CreateAdvert(formData)
-	if err == nil {
-		w.Write([]byte("advert can't be created"))
+	res, err := s.app.CreateAdvert(formData)
+	if err != nil {
+		w.Write([]byte(err.Error()))
 		return
 	}
-	w.Write([]byte("advert has been created successfully"))
+	w.Write([]byte(res))
 	return
 }
-
-// func (s *Server) adv(w http.ResponseWriter, r *http.Request) {
-// 	title := r.URL.Path[len("/advert/") :]
-// 	fmt.Fprintf(w, title)
-// }
 
 func (s *Server) ServerStart() {
 	http.HandleFunc("/advert/", s.getAdvert)
 	http.HandleFunc("/adverts", s.getAdverts)
 	http.HandleFunc("/upload", s.uploadAdvert)
+	http.Handle("/files/", http.StripPrefix("/files", http.FileServer(http.Dir("files"))))
 
 	// http.HandleFunc("/advert/", s.adv)
 	log.Fatal(http.ListenAndServe(":8080", nil))
