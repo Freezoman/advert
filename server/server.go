@@ -31,7 +31,6 @@ func (s *Server) getAdvert(w http.ResponseWriter, r *http.Request) {
 	if ok {
 		fields = append(fields, strings.Split(keys[0], ",")...)
 	}
-	// fmt.Println(fields)
 	w.Header().Set("Content-Type", "application/json")
 	fmt.Fprint(w, s.app.GetJsonAdvert(id, fields...))
 }
@@ -72,6 +71,5 @@ func (s *Server) ServerStart() {
 	http.HandleFunc("/upload", s.uploadAdvert)
 	http.Handle("/files/", http.StripPrefix("/files", http.FileServer(http.Dir("files"))))
 
-	// http.HandleFunc("/advert/", s.adv)
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }

@@ -11,8 +11,4 @@ func main() {
 	a := app.Init(m)
 	s := server.Init(a)
 	s.ServerStart()
-
-	// fmt.Println(model.GetAdverts())
-	// server.ServerStart()
-	// app.GetJsonAdvert(1)
 }
