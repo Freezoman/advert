@@ -21,6 +21,10 @@ type IModel interface {
 	GetAdverts(sortField string, order string) []model.Ad
 	InsertAdvert(ad model.Ad) (uint, error)
 }
+type response struct {
+	Id     string `json:"id"`
+	Status string `json:"status"`
+}
 
 func find(slice []string, val string) bool {
 	for _, item := range slice {
@@ -107,7 +111,14 @@ func (a *App) CreateAdvert(data *multipart.Form) (string, error) {
 	if err != nil {
 		return "Cannot save advert", err
 	}
-	return fmt.Sprint(res), nil
+	response := response{Id: fmt.Sprint(res), Status: "ok"}
+
+	resp, err := json.Marshal(response)
+	if err != nil {
+		return "Cannot form json", err
+	}
+
+	return string(resp), nil
 
 }
 
