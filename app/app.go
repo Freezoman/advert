@@ -3,9 +3,10 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"io"
+	"io/ioutil"
 	"mime/multipart"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"test/model"
@@ -111,37 +112,31 @@ func (a *App) CreateAdvert(data *multipart.Form) (string, error) {
 }
 
 func (a *App) createPhoto(handler *multipart.FileHeader) (model.Photo, error) {
+	extMap := map[string]string{"image/jpeg": "jpg", "image/gif": "gif", "image/png": "png"}
 	var photo model.Photo
+
 	file, err := handler.Open()
 	defer file.Close()
 	if err != nil {
 		return photo, err
 	}
-	// fmt.Println(handler.Header.Get("Content-Type"))
 
-	// tempFile, err := ioutil.TempFile("files", "upload-*.png")
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// defer tempFile.Close()
-
-	// fileBytes, err := ioutil.ReadAll(file)
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// tempFile.Write(fileBytes)
-
-	out, err := os.Create("./files/" + handler.Filename)
-	defer out.Close()
-	if err != nil {
-		return photo, err
+	if _, err := os.Stat("./files"); os.IsNotExist(err) {
+		os.Mkdir("./files", os.ModeDir)
 	}
 
-	_, err = io.Copy(out, file)
-
+	tempFile, err := ioutil.TempFile("files", "upload-*."+extMap[handler.Header.Get("Content-Type")])
 	if err != nil {
-		return photo, err
+		fmt.Println(err)
 	}
-	photo.Url = "http://localhost:8080/" + "files/" + handler.Filename
+	defer tempFile.Close()
+
+	fileBytes, err := ioutil.ReadAll(file)
+	if err != nil {
+		fmt.Println(err)
+	}
+	tempFile.Write(fileBytes)
+
+	photo.Url = "http://localhost:8080/" + filepath.ToSlash(tempFile.Name())
 	return photo, nil
 }
